@@ -1,7 +1,7 @@
 import { INODE , NodePlan} from "../models/node.model";
 import { NodeOrder, INODEOrder } from "../models/nodeOrder.model";
 import {redisClient } from '../config/redis.config'
-
+import { User } from "../models/user.model";
 
 interface nodePlan{
 
@@ -24,6 +24,12 @@ interface nodePlan{
         fieldName: string;
         
       }[];
+}
+
+interface adminData {
+  totalPlans: number;
+  totalOrders: number;
+  totalUsers: number;
 }
 
 
@@ -59,7 +65,7 @@ export class AdminService{
         }
     }
 
-    static async changeAvailability(nodeId:any, availability:boolean) {
+    static async changeAvailability(nodeId:any, availability:string) {
         try {
           // Validate that nodeId is provided
           if (!nodeId) {
@@ -72,7 +78,7 @@ export class AdminService{
           // Update the node's availability
           const updatedNode = await NodePlan.findByIdAndUpdate(
             nodeId,
-            { isAvailable: availability },
+            { availability : availability },
             { new: true } // Return the updated document
           );
           
@@ -85,6 +91,13 @@ export class AdminService{
         } catch (error) {
           throw error;
         }
+      }
+
+      static async getAdminData(): Promise<adminData>{
+        const totalPlans = await NodePlan.countDocuments();
+        const totalOrders = await NodeOrder.countDocuments();
+        const totalUsers = await User.countDocuments();
+        return {totalPlans, totalOrders, totalUsers};
       }
 
 
@@ -228,7 +241,30 @@ export class AdminService{
         
 
       }
+
+
     
+      static async listOfUsers(){
+
+        const users = await User.find();
+        return users;
+
+      }
+
+      static async listOfOrders(){
+
+        const orders = await NodeOrder.find();
+        return orders;
+
+      }
+
+      static async deleteUser(userId: string){
+
+        const user = await User.findByIdAndDelete(userId);
+        return user;
+
+      }
+      
     
 
 

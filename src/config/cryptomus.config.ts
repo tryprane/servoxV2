@@ -4,6 +4,8 @@ import {logger } from '../utils/logger';
 import dotenv from 'dotenv';
 import path from 'path';
 
+dotenv.config({path: path.join(__dirname, '../../.env')});
+
 export interface CryptoPayment {
     amount: number;
     currency: string;
@@ -21,6 +23,8 @@ export class CryptoClient {
     constructor() {
         this.apiKey = process.env.CRYPTOMUS_API_KEY || '';
         this.merchantId = process.env.CRYPTOMUS_MERCHANT_ID || '';
+
+        console.log(this.merchantId);
 
         if(!this.apiKey || !this.merchantId) {
             logger.error(

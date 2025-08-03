@@ -8,7 +8,7 @@ const nodeOrder = express.Router();
 nodeOrder.post('/', authenticate, NodeOrderController.createOrder);
 
 // Get orders for a specific user
-nodeOrder.get('/user/:walletId', authenticate, NodeOrderController.getUserOrders);
+nodeOrder.get('/user', authenticate, NodeOrderController.getUserOrders);
 
 // Get a specific order by ID
 nodeOrder.get('/:orderId', authenticate, NodeOrderController.getOrderById);

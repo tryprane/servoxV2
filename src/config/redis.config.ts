@@ -4,6 +4,11 @@ import {logger } from '../utils/logger'
 import dotenv from 'dotenv'
 import { error } from 'console';
 
+dotenv.config();
+
+console.log("Environment Variables loaded");
+// console.log("REDIS_HOST: ", process.env.REDIS_HOST);
+
 const redisClient = new Redis({
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),

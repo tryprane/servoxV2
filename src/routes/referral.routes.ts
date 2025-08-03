@@ -6,3 +6,5 @@ const referRouter = express.Router();
 
 referRouter.post('/validate' , ReferralController.validateReferralCode);
 referRouter.get('/stats' , authenticate , ReferralController.getReferralStats);
+
+export default referRouter;

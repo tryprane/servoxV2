@@ -2,6 +2,7 @@ import { NodeOrder , INODEOrder } from "../models/nodeOrder.model";
 import { NodePlan , INODE } from "../models/node.model";
 import{logger } from '../utils/logger'
 import { Schema } from "mongoose";
+import Notification from "../models/notifications.model";
 
 
 export class NodeOrderService {
@@ -9,19 +10,29 @@ export class NodeOrderService {
     walletId: string;
     nodeId: Schema.Types.ObjectId | string;
     planDuration: 'monthly' | 'quaterly' | 'biannually';
-    node: {
-      nodeId: string;
-      name: string;
-      nodeImg: string;
-      nodeLink: string;
-    };
+  
     inputData?: { fieldName: string; fieldValue: string }[];
   }): Promise<INODEOrder> {
     try {
       // Fetch the node plan details
       const nodePlan = await NodePlan.findById(data.nodeId);
+      console.log(nodePlan);
       if (!nodePlan) {
         throw new Error('Invalid Node Plan Selected');
+      }
+
+      if(nodePlan.spots > 0 ) {
+        nodePlan.spots--;
+        await nodePlan.save();
+      }else{
+        throw new Error('Node Plan has no available spots');
+      }
+
+      const node = {
+        nodeId: data.nodeId.toString(),
+        name: nodePlan.name,
+        nodeImg: nodePlan.nodeImg,
+        nodeLink: nodePlan.nodeLink
       }
 
       // Generate a unique orderId (you might want to implement your own logic)
@@ -36,10 +47,10 @@ export class NodeOrderService {
       // Create orderData object
       const orderData: Partial<INODEOrder> = {
         orderId,
-        walletId: data.walletId,
+        walletId: data.walletId.toLowerCase(),
         nodeId: data.nodeId,
         planDuration: data.planDuration,
-        node: data.node,
+        node: node,
         amount,
         status: 'pending',
         orderDate: new Date(),
@@ -68,6 +79,12 @@ export class NodeOrderService {
       
       const order = await NodeOrder.create(orderData);
       logger.info(`Node Order created: ${order.orderId}`);
+      const notification = new Notification({
+        walletId: data.walletId,
+        message: `Node Order created: ${order.orderId}`,
+        type: 'node-order-created'
+      })
+      await notification.save();
       return order;
       
     } catch (error) {

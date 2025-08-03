@@ -1,6 +1,9 @@
 import { ethers } from "ethers";
 import { User , IUser } from "../models/user.model";
 import { logger } from "../utils/logger";
+import { ReferralService } from "./referral.service";
+import referRouter from "../routes/referral.routes";
+import Notification from "../models/notifications.model";
 
 
 export class AuthService{
@@ -49,7 +52,25 @@ export class AuthService{
           // Update nonce for next login
           await user.refreshNonce();
         }
+
+        const notification = await Notification.findOne({
+            walletId: user.walletAddress,
+            type: 'profile-login'
+        })
         
+        if(!notification){
+        const notification = new Notification({
+            walletId: user.walletAddress,
+        message: `Profile Login successfully at ${new Date().toLocaleString()}`,
+            type: 'profile-login'
+        })
+        await notification.save();
+        }else{
+            notification.message = `Profile Login successfully at ${new Date().toLocaleString()}`;
+            await notification.save();
+        }
+        
+
         return { valid: isValid, user };
       }
 
@@ -58,7 +79,8 @@ export class AuthService{
         profileData: {
             firstName?:string;
             lastName?:string;
-            email?: string;
+            email: string;
+            referralCode?:string;
         }) {
         
         try {
@@ -89,10 +111,26 @@ export class AuthService{
             }
             user.email = profileData.email;
         }
+
+        if(profileData.referralCode){
+            try {
+                await ReferralService.processNewUserReferral(userId , profileData.referralCode)
+                
+            } catch (error) {
+                throw new Error('Invalid Refer Type')
+            }
+        }
         
 
         user.isUpdated = true;
         // Save the updated user
+
+
+        const notification = new Notification({
+            walletId: user.walletAddress,
+            message: 'Profile updated successfully',
+            type: 'profile-update'
+        })
 
         await user.save();
 
@@ -108,5 +146,7 @@ export class AuthService{
        
 
       }
+
+      
       
     }

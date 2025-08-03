@@ -10,7 +10,11 @@ export class AuthController{
     static async getIN(req: Request , res: Response , next : NextFunction){
 
         try {
+
+            // console.log(req)
             const {walletAddress} = req.body;
+
+
 
             if(!walletAddress){
                 res.status(400).json({ message: 'Wallet address is required' });
@@ -36,13 +40,33 @@ export class AuthController{
 
     }
 
+    static getME(req: Request , res: Response){
+        try {
+
+            if(!req.user){
+                throw new Error
+            }
+            res.status(200).json({
+                status: 'success',
+                data: req.user
+            })
+        } catch (error) {
+            res.status(400).json({
+                status: 'failed',
+                message: error
+            })
+        }
+    }
+
+
+
     static async updateProfile(req: Request , res: Response , next: NextFunction) {
 
         try {
             const userId = req.params.userId || req.user?.id; // Get userId from params or authenticated user
             
             if (!userId) {
-              return res.status(400).json({ 
+               res.status(400).json({ 
                 success: false, 
                 message: 'User ID is required' 
               });
@@ -50,25 +74,27 @@ export class AuthController{
             }
             
             // Extract profile data from request body
-            const { firstName, lastName, email } = req.body;
+            const { firstName, lastName, email , referralCode } = req.body;
             
             // Call the service method to update the profile
             const updatedUser = await AuthService.updateProfile(userId, {
               firstName,
               lastName,
-              email
+              email,
+              referralCode
             });
             
             // If user not found
             if (!updatedUser) {
-              return res.status(404).json({
+              res.status(404).json({
                 success: false,
                 message: 'User not found'
               });
+              return
             }
             
             // Return success response with updated user data
-            return res.status(200).json({
+             res.status(200).json({
               success: true,
               message: 'Profile updated successfully',
               data: {
@@ -78,7 +104,7 @@ export class AuthController{
                 email: updatedUser.email
               }
             });
-            
+            return
           } catch (error: any) {
             next(error);
           }

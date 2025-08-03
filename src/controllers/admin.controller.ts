@@ -31,14 +31,59 @@ export class AdminController {
         }
     }
 
+    static async listAllUsers(req: Request, res: Response, next: NextFunction) {
+        try{
+            const users = await AdminService.listOfUsers();
+            res.status(200).json({
+                status: 'success',
+                data: users});
+        }catch(error){
+            next(error);
+        }
+    }
+
+    static async listofOrders(req: Request, res: Response, next: NextFunction) {
+        try{
+            const orders = await AdminService.listOfOrders();
+            res.status(200).json({
+                status: 'success',
+                data: orders
+            });
+        }catch(error){
+            next(error);
+        }
+    }
+
+    static async getAdminData(req: Request, res: Response, next: NextFunction) {
+        try{
+            const adminData = await AdminService.getAdminData();
+            res.status(200).json({
+                status: 'success',
+                data: adminData
+            });
+        }catch(error){
+            next(error);
+        }
+    }
+    static async deleteUser(req: Request, res: Response, next: NextFunction) {  
+        try{
+            const {userId} = req.params;
+            const user = await AdminService.deleteUser(userId);
+            res.status(200).json({
+                status: 'success',
+                data: user
+            });
+        }catch(error){
+            next(error);
+        }
+    }
+
     static async changeAvailability(req: Request, res: Response, next: NextFunction) {
         try {
             const { nodeId } = req.params;
             const { availability } = req.body;
 
-            if (typeof availability !== 'boolean') {
-                throw new AppError('Availability must be a boolean value', 400);
-            }
+         
 
             const updatedNode = await AdminService.changeAvailability(nodeId, availability);
             

@@ -6,3 +6,5 @@ const paymentRouter = express.Router();
 
 paymentRouter.post('/initiate' , authenticate , PaymentController.initiatePayment);
 paymentRouter.post('/webhook' , PaymentController.handleWebhook)
+
+export default paymentRouter;

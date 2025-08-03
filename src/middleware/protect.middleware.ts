@@ -42,7 +42,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
         req.user = {
             id: user._id,
             walletAddress: user.walletAddress,
-            role: user.role
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
         };
         
         next();

@@ -4,7 +4,7 @@ import { CryptoClient } from "../config/cryptomus.config";
 import { logger } from "../utils/logger";
 import axios from "axios";
 import { AppError } from "../utils/appError";
-
+import Notification from "../models/notifications.model";
 const PUSHOVER_USER_KEY = 'u5ob32jvrjfoqzqqmvev2v27ehkf3j'; // You'll get this from Pushover
 const PUSHOVER_API_TOKEN = 'abte56yuhdcnq2s7e6ds1neuakeqy7';
 
@@ -22,8 +22,9 @@ export class PaymentService{
     private static cryptoClient = new CryptoClient();
 
     static async initiatePayment(
-        orderId: string,
         userId: string,
+        orderId: string,
+        walletAddress: string,
         amount: number
     ): Promise<IPayment>{
 
@@ -31,7 +32,7 @@ export class PaymentService{
 
         const order = await NodeOrder.findOne({
             orderId,
-            userId
+            walletId: walletAddress
         })
         if(!order){
             throw new Error('Order not found');
@@ -67,7 +68,7 @@ export class PaymentService{
 
         const payment = await Payment.create({
             orderId,
-            userId,
+            userId: userId,
             amount,
             cryptomusPaymentId: paymentResponse.result.uuid,
             status: 'pending',
@@ -75,6 +76,12 @@ export class PaymentService{
             additionalDetails: paymentResponse
         });
 
+        const notification = new Notification({
+            walletId: walletAddress,
+            message: `Payment initiated for order: ${orderId}`,
+            type: 'payment-initiated'
+        })
+        await notification.save();
         return payment;
 
     } catch(error){
@@ -111,6 +118,12 @@ export class PaymentService{
             case 'paid':
                 payment.status = 'completed';
                 await this.completeOrder(order_id);
+                const notification = new Notification({
+                    walletId: payment.userId,
+                    message: `Payment completed for order: ${order_id}`,
+                    type: 'payment-completed'
+                })
+                await notification.save();
                 await this.sendPushoverNotification({
                     title: 'Payment Received!',
                     message: `Order ${order_id} paid: ${amount}`,

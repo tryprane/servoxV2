@@ -98,6 +98,10 @@ const nodeOrderSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    amount: {
+      type: Number,
+      required: true,
+    },
     deployDate: {
       type: Date,
     },

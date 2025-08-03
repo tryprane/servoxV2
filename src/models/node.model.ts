@@ -4,9 +4,12 @@ import mongoose , {Document , Schema} from "mongoose";
 
 export interface INODE extends Document {
 
+   
+
     name: string;
     nodeImg:string;
-    isAvailable:boolean;
+    availability:'available' | 'expired' | 'upcoming';
+    spots: number;
     category: string
     nodeLink: string;
     description: string;
@@ -30,6 +33,8 @@ const nodeSchema = new Schema(
 
     {
 
+    
+
         name:{
             type:String,
             required: true,
@@ -42,8 +47,14 @@ const nodeSchema = new Schema(
             required:true
 
         },
-        isAvailable:{
-            type: Boolean
+        availability:{
+          type: String,
+          enum: ['available', 'expired', 'upcoming'],
+          required: true,
+        },
+        spots: {
+            type: Number,
+            required: true,
         },
         category:{
             type: String

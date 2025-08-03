@@ -50,10 +50,21 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        unique: true,
         lowercase: true,
         trim: true,
-        sparse: true // Allow null/undefined values to support unique constraint
+        validate: {
+            validator: async function(value) {
+                if (!value) return true; // Allow empty/null values
+                
+                // Check for duplicates only if email is provided
+                const existingUser = await this.constructor.findOne({ 
+                    email: value, 
+                    _id: { $ne: this._id } 
+                });
+                return !existingUser;
+            },
+            message: 'Email already exists'
+        }
     },
     role: {
         type: String,

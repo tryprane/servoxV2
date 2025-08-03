@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { NodeOrderService } from '../services/nodeOrder.service';
 import { AppError } from '../utils/appError';
 import { logger } from '../utils/logger';
+import { AdminService } from '../services/admin.service';
 
 export class NodeOrderController {
     static async createOrder(req: Request, res: Response, next: NextFunction) {
@@ -20,9 +21,12 @@ export class NodeOrderController {
 
     static async getUserOrders(req: Request, res: Response, next: NextFunction) {
         try {
-            const { walletId } = req.params;
+            const walletId  = req.user.walletAddress;
+            if (!walletId){
+                throw new Error('No wallet Id is avialable')
+            }
             const orders = await NodeOrderService.getUserOrders(walletId);
-            
+  
             res.status(200).json({
                 status: 'success',
                 data: orders
@@ -102,6 +106,19 @@ export class NodeOrderController {
             res.status(200).json({
                 status: 'success',
                 data: orders
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async getPostedPlan(req: Request, res: Response, next: NextFunction) {
+        try {
+            const plans = await AdminService.getPostedPlan();
+            
+            res.status(200).json({
+                status: 'success',
+                data: plans
             });
         } catch (error) {
             next(error);

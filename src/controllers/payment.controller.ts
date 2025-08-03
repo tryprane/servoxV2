@@ -6,13 +6,17 @@ import { logger } from '../utils/logger';
 export class PaymentController {
     static async initiatePayment(req: Request, res: Response, next: NextFunction) {
         try {
-            const { orderId, userId, amount } = req.body;
+            const { orderId,  amount } = req.body;
+            const walletAddress = req.user.walletAddress;
+            const userId = req.user.id;
 
-            if (!orderId || !userId || !amount) {
+            console.log(walletAddress , orderId , amount);
+
+            if (!orderId || !walletAddress || !amount) {
                 throw new AppError('Missing required fields', 400);
             }
 
-            const payment = await PaymentService.initiatePayment(orderId, userId, amount);
+            const payment = await PaymentService.initiatePayment(userId, orderId, walletAddress, amount);
             res.status(200).json({
                 status: 'success',
                 data: payment
