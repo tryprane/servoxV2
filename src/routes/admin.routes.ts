@@ -37,4 +37,6 @@ admin.get('/orders', AdminController.listofOrders);
 // Delete a user
 admin.delete('/users/:userId', AdminController.deleteUser);
 
+admin.delete('/plan/:planId' , AdminController.deletePlan);
+
 export default admin;

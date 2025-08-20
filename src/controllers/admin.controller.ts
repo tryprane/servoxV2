@@ -78,6 +78,19 @@ export class AdminController {
         }
     }
 
+    static async deletePlan(req: Request, res: Response, next: NextFunction) {  
+        try{
+            const {planId} = req.params;
+            const plan = await AdminService.deletePlan(planId);
+            res.status(200).json({
+                status: 'success',
+                data: plan
+            });
+        }catch(error){
+            next(error);
+        }
+    }
+
     static async changeAvailability(req: Request, res: Response, next: NextFunction) {
         try {
             const { nodeId } = req.params;

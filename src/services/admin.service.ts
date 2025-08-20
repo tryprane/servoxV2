@@ -264,6 +264,16 @@ export class AdminService{
         return user;
 
       }
+
+      static async deletePlan(planId: string){
+
+        try {
+          const plan = await NodePlan.findByIdAndDelete(planId);
+          return plan
+        } catch (error) {
+          throw error; 
+        }
+      }
       
     
 
