@@ -41,7 +41,8 @@ app.use('/api/nodeorder', nodeOrder);
 app.get('/health' , (req: Request , res: Response) => {
     res.status(200).json({
         status: 'ok',
-        time: new Date().toISOString()
+        time: new Date().toISOString(),
+        message: "CI/CD is Working"
     })
 })
 
